@@ -18,7 +18,9 @@
 
 namespace OcraCachedViewResolver\Factory;
 
+use Interop\Container\ContainerInterface;
 use OcraCachedViewResolver\Module;
+use Zend\Cache\Storage\StorageInterface;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 use Zend\Cache\StorageFactory;
@@ -33,11 +35,27 @@ use Zend\Cache\StorageFactory;
 final class CacheFactory implements FactoryInterface
 {
     /**
+     * @param ContainerInterface $container
+     * @param string $requestedName
+     * @param array|null $options
+     * @return StorageInterface
+     * @throws \Interop\Container\Exception\ContainerException
+     * @throws \Interop\Container\Exception\NotFoundException
+     * @throws \Zend\Cache\Exception\InvalidArgumentException
+     */
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
+    {
+        $config = $container->get('config');
+
+        return StorageFactory::factory($config[Module::CONFIG][Module::CONFIG_CACHE_DEFINITION]);
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
-        $config = $serviceLocator->get('Config');
+        $config = $serviceLocator->get('config');
 
         return StorageFactory::factory($config[Module::CONFIG][Module::CONFIG_CACHE_DEFINITION]);
     }

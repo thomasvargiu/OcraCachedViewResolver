@@ -18,6 +18,7 @@
 
 namespace OcraCachedViewResolver\Factory;
 
+use Interop\Container\ContainerInterface;
 use OcraCachedViewResolver\Module;
 use OcraCachedViewResolver\View\Resolver\CachingMapResolver;
 use OcraCachedViewResolver\View\Resolver\LazyResolver;
@@ -41,9 +42,37 @@ final class CompiledMapResolverDelegatorFactory implements DelegatorFactoryInter
      */
     public function createDelegatorWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName, $callback)
     {
-        $config = $serviceLocator->get('Config')[Module::CONFIG];
+        return $this->create($serviceLocator, $callback);
+    }
+
+    /**
+     * A factory that creates delegates of a given service
+     *
+     * @param  ContainerInterface $container
+     * @param  string             $name
+     * @param  callable           $callback
+     * @param  null|array         $options
+     * @return AggregateResolver
+     */
+    public function __invoke(ContainerInterface $container, $name, callable $callback, array $options = null)
+    {
+        return $this->create($container, $callback);
+    }
+
+    /**
+     * @param ContainerInterface|ServiceLocatorInterface $container
+     * @param callable $callback
+     * @return AggregateResolver
+     */
+    protected function create($container, callable $callback)
+    {
+        if (!$container instanceof ContainerInterface && !$container instanceof ServiceLocatorInterface) {
+            throw new \InvalidArgumentException('Invalid container');
+        }
+
+        $config = $container->get('config')[Module::CONFIG];
         /* @var $cache \Zend\Cache\Storage\StorageInterface */
-        $cache  = $serviceLocator->get($config[Module::CONFIG_CACHE_SERVICE]);
+        $cache  = $container->get($config[Module::CONFIG_CACHE_SERVICE]);
 
         $resolver = new AggregateResolver();
 

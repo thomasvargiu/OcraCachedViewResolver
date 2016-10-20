@@ -67,7 +67,7 @@ class CompiledMapResolverDelegatorFactoryTest extends PHPUnit_Framework_TestCase
 
         $this->locator->expects($this->any())->method('get')->will($this->returnValueMap([
             [
-                'Config',
+                'config',
                 [
                     Module::CONFIG => [
                         Module::CONFIG_CACHE_KEY     => 'key-name',
